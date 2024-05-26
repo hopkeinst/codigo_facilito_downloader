@@ -12,6 +12,21 @@ from . import consts
 from .models.video import Quality
 
 
+def is_file(file: str, type_file: str) -> bool:
+    """
+    Checks if the file exists
+    """
+    return os.path.exists(file+"."+type_file)
+
+
+def is_article_url(url: str) -> bool:
+    """
+    Checks if the provided url is a valid article url
+    """
+    pattern = re.compile(consts.ARTICLE_URL_REGEX)
+    return bool(pattern.match(url))
+
+
 def is_video_url(url: str) -> bool:
     """
     Checks if the provided url is a valid video url
@@ -25,6 +40,14 @@ def is_course_url(url: str) -> bool:
     Checks if the provided url is a valid course url
     """
     pattern = re.compile(consts.COURSE_URL_REGEX)
+    return bool(pattern.match(url))
+
+
+def is_bootcamp_url(url: str) -> bool:
+    """
+    Checks if the provided url is a valid bootcamp url
+    """
+    pattern = re.compile(consts.BOOTCAMP_URL_REGEX)
     return bool(pattern.match(url))
 
 
@@ -141,6 +164,19 @@ def write_json(data: Dict[str, Any], path: str) -> None:
         json.dump(data, file, indent=4, ensure_ascii=False)
 
 
+def clean_new_line(text: str) -> str:
+    """
+    Clean the string 'text' of new lines '\n'
+
+    Args:
+        text (str): String to clean
+
+    Returns:
+        str: Cleaned text string
+    """
+    return re.sub(consts.NEWLINE_NAME, " ", text).strip()
+
+
 def clean_string(text: str) -> str:
     """
     This function cleans the input string by removing special
@@ -152,7 +188,47 @@ def clean_string(text: str) -> str:
     Returns:
         str: The cleaned string.
     """
-    return re.sub(r'[<>:"/\\|?!¡¿º%&~ª*+=!"#$%&?¿¡[\]{}@]', "", text).strip()
+    return re.sub(consts.SYMBOLS_NAME, "", text).strip()
+
+
+def clean_bootcamp_title(bootcamp_title: str) -> str:
+    """
+    This function clean the input string by removing the initial
+    string 'Bootcamp' or 'Bootcamp de'
+
+    Args:
+        bootcamp_title (str): The bootcamp title to be cleaned.
+
+    Returns:
+        str: The cleaned bootcamp title.
+    """
+    pattern = re.compile(r"Bootcamp(?:\s*de\s*)?(.*)", re.IGNORECASE)
+    match = re.search(pattern, bootcamp_title)
+    if match:
+        bootcamp_title = match.group(1)
+        bootcamp_title = clean_string(bootcamp_title)
+        return bootcamp_title.capitalize()
+    return bootcamp_title.capitalize()
+
+
+def clean_course_title(course_title: str) -> str:
+    """
+    This function clean the input string by removing the initial
+    string 'Curso' or 'Curso de'
+
+    Args:
+        course_title (str): The course title to be cleaned.
+
+    Returns:
+        str: The cleaned bootcamp title.
+    """
+    pattern = re.compile(r"Curso(?:\s*de\s*)?(.*)", re.IGNORECASE)
+    match = re.search(pattern, course_title)
+    if match:
+        course_title = match.group(1)
+        course_title = clean_string(course_title)
+        return course_title.capitalize()
+    return course_title.capitalize()
 
 
 def check_dir(path: str) -> None:
