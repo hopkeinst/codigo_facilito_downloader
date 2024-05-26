@@ -115,6 +115,9 @@ poetry install
 # Instalar playwright dependencies
 playwright install-deps
 playwright install firefox
+playwright install chromium
+# Instala otra librería
+pipx install humanize
 ```
 
 3. Iniciar sesión a través de la consola con tus credenciales de Codigo Facilito.

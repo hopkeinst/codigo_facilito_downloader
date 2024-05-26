@@ -81,6 +81,21 @@ class CourseError(Exception):
     of some internal error (mostly because the course
     is not available anymore).
     """
+    
+class ClassErrorName(Exception):
+    """
+    Codigo Facilito refused to serve course data because
+    of some internal error (mostly because the class
+    is not available anymore).
+    """
+
+
+class BootcampError(Exception):
+    """
+    Codigo Facilito refused to serve bootcamp data because
+    of some internal error (mostly because the video
+    is not available anymore).
+    """
 
 
 class DownloadError(Exception):
