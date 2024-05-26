@@ -16,7 +16,7 @@ def is_file(file: str, type_file: str) -> bool:
     """
     Checks if the file exists
     """
-    return os.path.exists(file+"."+type_file)
+    return os.path.exists(file + "." + type_file)
 
 
 def is_article_url(url: str) -> bool:
@@ -191,6 +191,22 @@ def clean_string(text: str) -> str:
     return re.sub(consts.SYMBOLS_NAME, "", text).strip()
 
 
+def clean_title(title: str) -> str:
+    """
+    This function cleans the input string and updated the
+    first character for title style
+
+    Args:
+        title (str): The input string to be cleaned and updated.
+
+    Returns:
+        str:  The cleaned string.
+    """
+    title = clean_new_line(title)
+    title = clean_string(title)
+    return title[0].upper() + title[1:]
+
+
 def clean_bootcamp_title(bootcamp_title: str) -> str:
     """
     This function clean the input string by removing the initial
@@ -204,11 +220,11 @@ def clean_bootcamp_title(bootcamp_title: str) -> str:
     """
     pattern = re.compile(r"Bootcamp(?:\s*de\s*)?(.*)", re.IGNORECASE)
     match = re.search(pattern, bootcamp_title)
+    bootcamp_title = clean_new_line(bootcamp_title)
     if match:
         bootcamp_title = match.group(1)
-        bootcamp_title = clean_string(bootcamp_title)
-        return bootcamp_title.capitalize()
-    return bootcamp_title.capitalize()
+        return clean_title(bootcamp_title)
+    return clean_title(bootcamp_title)
 
 
 def clean_course_title(course_title: str) -> str:
@@ -222,13 +238,13 @@ def clean_course_title(course_title: str) -> str:
     Returns:
         str: The cleaned bootcamp title.
     """
+    course_title = clean_new_line(course_title)
     pattern = re.compile(r"Curso(?:\s*de\s*)?(.*)", re.IGNORECASE)
     match = re.search(pattern, course_title)
     if match:
         course_title = match.group(1)
-        course_title = clean_string(course_title)
-        return course_title.capitalize()
-    return course_title.capitalize()
+        return clean_title(course_title)
+    return clean_title(course_title)
 
 
 def check_dir(path: str) -> None:

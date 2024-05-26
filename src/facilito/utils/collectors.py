@@ -11,8 +11,7 @@ from .. import consts
 from ..errors import BootcampError, CourseError, URLError, VideoError
 from ..helpers import (
     clean_bootcamp_title,
-    clean_new_line,
-    clean_string,
+    clean_title,
     is_bootcamp_url,
     is_course_url,
     is_video_url,
@@ -30,26 +29,29 @@ def get_article_sync(url: str, page: Page) -> Page:
     """
     page.goto(url=url, wait_until=None)
     page.evaluate(
-    """
+        """
         let elements_to_delete = document.querySelectorAll("div[class='player-header']");
         for (let element of elements_to_delete) {
             element.parentNode.removeChild(element);
         }
-    """)
-    page.evaluate(
     """
+    )
+    page.evaluate(
+        """
         elements_to_delete = document.querySelectorAll("div[class='row f-gap-medium middle-xs']");
         for (let element of elements_to_delete) {
             element.parentNode.removeChild(element);
         }
-    """)
-    page.evaluate(
     """
+    )
+    page.evaluate(
+        """
         elements_to_delete = document.querySelectorAll("div[class='player-sidebar relative']");
         for (let element of elements_to_delete) {
             element.parentNode.removeChild(element);
         }
-    """)
+    """
+    )
     return page
 
 
@@ -75,12 +77,11 @@ def get_video_detail_sync(url: str, page: Page) -> Video:
     try:
         title = page.locator(
             """
-            h1[class='ibm bold-600 no-margin f-text-22'], 
+            h1[class='ibm bold-600 no-margin f-text-22'],
             h1[class='ibm bold-600 no-margin f-text-48']
             """
         ).inner_text()
-        title = clean_new_line(title)
-        title = clean_string(title)
+        title = clean_title(title)
     except Exception as e:
         error_message = f"[VIDEO] title not found: {url}"
         logger.error(error_message)
@@ -180,7 +181,9 @@ def get_bootcamp_detail_sync(url: str, page: Page) -> Bootcamp:
     # get bootcamp title
     bootcamp_title = clean_bootcamp_title(page.title())
 
-    tprint(f"[bold red]Bootcamp title:[/bold red] [bright_red]{bootcamp_title}[/bright_red]")
+    tprint(
+        f"[bold red]Bootcamp title:[/bold red] [bright_red]{bootcamp_title}[/bright_red]"
+    )
 
     path = f"{consts.DOWNLOADS_DIR}/"
     path += f"Bootcamp - {bootcamp_title}/"
@@ -188,11 +191,7 @@ def get_bootcamp_detail_sync(url: str, page: Page) -> Bootcamp:
     # get bootcamp modules
     try:
         all_modules = _get_modules(page=page, path=path)
-        bootcamp_obj = Bootcamp(
-            url=url,
-            title=bootcamp_title,
-            modules=all_modules
-        )
+        bootcamp_obj = Bootcamp(url=url, title=bootcamp_title, modules=all_modules)
         return bootcamp_obj
     except Exception as e:
         error_message = f"[BOOTCAMP] an error occurred: {url}"
@@ -250,52 +249,62 @@ def _get_sections(page: Page) -> list[CourseSection]:
 
     return sections
 
+
 def _get_videos(url: str, page: Page, dict_info: dict) -> list[BootcampVideo]:
     try:
-        page.goto(url = url, wait_until = None)
-        div_collapsible = page.query_selector("div[class*='collapsible-body no-border topics-li']")
+        page.goto(url=url, wait_until=None)
+        div_collapsible = page.query_selector(
+            "div[class*='collapsible-body no-border topics-li']"
+        )
         a_tags = div_collapsible.query_selector_all("a")
         videos_class: list[BootcampVideo] = []
         for a_tag in a_tags:
             video_url = a_tag.get_attribute("href")
-            video_sequence = int(clean_new_line(a_tag.query_selector(
-                "p[class*='no-margin h5 bold f-blues-text']"
-            ).inner_html()).strip().split(" ")[1])
+            video_sequence = int(
+                clean_title(
+                    a_tag.query_selector(
+                        "p[class*='no-margin h5 bold f-blues-text']"
+                    ).inner_html()
+                )
+                .strip()
+                .split(" ")[1]
+            )
             video_title = a_tag.query_selector(
                 "p[class*='ibm f-text-16 bold no-margin-bottom f-top-small']"
             ).inner_html()
-            video_title = clean_new_line(video_title)
+            video_title = clean_title(video_title)
             if video_title.upper() != "CLASE COMPLETA":
-                pattern = re.compile(r"Clase Completa(?:\s*de\s*|\s*-\s*)?(.*)", re.IGNORECASE)
+                pattern = re.compile(
+                    r"Clase Completa(?:\s*de\s*|\s*-\s*)?(.*)", re.IGNORECASE
+                )
                 match = re.search(pattern, video_title)
                 if match:
                     video_title = match.group(1)
-            video_title = clean_string(video_title)
+            video_title = clean_title(video_title)
             tprint("      [bold green]Video title:[/bold green]", end=" ")
             tprint(f"[green]{video_sequence:02d}. {video_title}[/green]")
             video_obj = BootcampVideo(
-                url = f"{consts.BASE_URL}{video_url}",
-                sequence = video_sequence,
-                title = video_title
+                url=f"{consts.BASE_URL}{video_url}",
+                sequence=video_sequence,
+                title=video_title,
             )
             videos_class.append(video_obj)
         return videos_class
     except Exception as e:
-        error_message = f"[MODULE] {dict_info['module_sequence']:02d}. {dict_info['module_title']} "
-        error_message += f"[CLASS] {dict_info['class_sequence']:02d}. {dict_info['class_title']} "
+        error_message = (
+            f"[MODULE] {dict_info['module_sequence']:02d}. {dict_info['module_title']} "
+        )
+        error_message += (
+            f"[CLASS] {dict_info['class_sequence']:02d}. {dict_info['class_title']} "
+        )
         error_message += f"=> {e}"
         logger.error(error_message)
         tprint(f"Exception: {e}")
 
 
-def _get_classes(
-        a_tags,
-        path: str,
-        page: Page,
-        dict_info: dict
-    ) -> list[BootcampClass]:
+def _get_classes(a_tags, path: str, page: Page, dict_info: dict) -> list[BootcampClass]:
     """
-    Get information about the classes that make up 
+    Get information about the classes that make up
     a bootcamp module
 
     Args:
@@ -316,42 +325,55 @@ def _get_classes(
         p_title = a_tag.query_selector(
             "p[class='ibm f-text-16 bold no-margin-bottom f-top-small']"
         )
-        p_tag = (a_tag.query_selector(
-            "p[class*='no-margin h5 bold f-blues-text--2']"
-        )).inner_html()
+        p_tag = (
+            a_tag.query_selector("p[class*='no-margin h5 bold f-blues-text--2']")
+        ).inner_html()
         match = re.search(consts.CLASS_NAME, p_tag)
         p_sequence = [int(match.group(1)), match.group(2)]
         if p_title is not None:
-            class_title = clean_string(p_title.inner_html())
+            class_title = clean_title(p_title.inner_html())
             class_url = consts.BASE_URL + a_tag.get_attribute("href")
             if p_sequence[1] != "Curso":
                 tprint("    [bold magenta]Class Title:[/bold magenta]", end=" ")
-                tprint(f"[bright_magenta]{p_sequence[0]:02d}. {class_title}[/bright_magenta]")
+                tprint(
+                    f"[bright_magenta]{p_sequence[0]:02d}. {class_title}[/bright_magenta]"
+                )
                 new_page = page.context.new_page()
-                all_videos = _get_videos(class_url, new_page, dict_info={
-                    "module_sequence": dict_info["module_sequence"],
-                    "module_title": dict_info["module_title"],
-                    "class_sequence": p_sequence[0],
-                    "class_title": class_title
-                })
+                all_videos = _get_videos(
+                    class_url,
+                    new_page,
+                    dict_info={
+                        "module_sequence": dict_info["module_sequence"],
+                        "module_title": dict_info["module_title"],
+                        "class_sequence": p_sequence[0],
+                        "class_title": class_title,
+                    },
+                )
                 while not new_page.is_closed():
                     new_page.close()
-                all_classes.append(BootcampClass(
-                    sequence=p_sequence[0],
-                    title=class_title,
-                    url=f"{consts.BASE_URL}{class_url}",
-                    videos=all_videos
-                ))
+                all_classes.append(
+                    BootcampClass(
+                        sequence=p_sequence[0],
+                        title=class_title,
+                        url=f"{consts.BASE_URL}{class_url}",
+                        videos=all_videos,
+                    )
+                )
             else:
-                _print_error_class(path=path, dict_info={
-                    "module_sequence": dict_info["module_sequence"],
-                    "module_title": dict_info["module_title"],
-                    "class_sequence": p_sequence[0],
-                    "class_title": class_title,
-                    "class_url": class_url
-                })
+                _print_error_class(
+                    path=path,
+                    dict_info={
+                        "module_sequence": dict_info["module_sequence"],
+                        "module_title": dict_info["module_title"],
+                        "class_sequence": p_sequence[0],
+                        "class_title": class_title,
+                        "class_url": class_url,
+                    },
+                )
         else:
-            error_message = f"[MODULE] {dict_info['module_title']} [CLASS] {p_sequence[0]:02d}"
+            error_message = (
+                f"[MODULE] {dict_info['module_title']} [CLASS] {p_sequence[0]:02d}"
+            )
             logger.error(error_message)
     return all_classes
 
@@ -369,13 +391,16 @@ def _get_modules(page: Page, path: str) -> list[BootcampModule]:
 
     all_modules: list[BootcampModule] = []
     all_ul = page.query_selector_all(
-        "ul[class='collapsible no-box-shadow no-border f-topics flex-column f-top f-gap-medium flex-block f-dark-mode']")[0]
+        "ul[class='collapsible no-box-shadow no-border f-topics flex-column f-top f-gap-medium flex-block f-dark-mode']"
+    )[0]
     modules_li = all_ul.query_selector_all("li[class*='f-radius-small']")
     for module in modules_li:
-        module_title = clean_string(module.query_selector("h4").inner_html())
-        span_module = module.query_selector(
-            "span[class='f-green-text f-green-text--2 bold h5']"
-            ).inner_html().split("\n")
+        module_title = clean_title(module.query_selector("h4").inner_html())
+        span_module = (
+            module.query_selector("span[class='f-green-text f-green-text--2 bold h5']")
+            .inner_html()
+            .split("\n")
+        )
         span_module = list(filter(None, span_module))
         module_sequence = int(span_module[1])
         if module_title is None:
@@ -385,13 +410,17 @@ def _get_modules(page: Page, path: str) -> list[BootcampModule]:
         tprint(f"[bright_cyan]{module_sequence:02d}. {module_title}[/bright_cyan]")
         path += f"{module_sequence:02d}. {module_title}/"
         a_tags = module.query_selector_all("a")
-        all_classes = _get_classes(a_tags=a_tags, path=path, page=page, dict_info={
-            "module_sequence": module_sequence,
-            "module_title": module_title})
+        all_classes = _get_classes(
+            a_tags=a_tags,
+            path=path,
+            page=page,
+            dict_info={
+                "module_sequence": module_sequence,
+                "module_title": module_title,
+            },
+        )
         bootcamp_module_obj = BootcampModule(
-            sequence=module_sequence,
-            title=module_title,
-            classes=all_classes
+            sequence=module_sequence, title=module_title, classes=all_classes
         )
         all_modules.append(bootcamp_module_obj)
 
@@ -425,8 +454,8 @@ def _print_error_class(path: str, dict_info: dict):
         path=path,
         file_name=f"{dict_info['class_sequence']:02d}. {dict_info['class_title']}",
         type_file="txt",
-        url=dict_info['class_url']
-        ):
+        url=dict_info["class_url"],
+    ):
         tprint("[bold red]Error ![/bold red] generating file => ", end="")
         tprint(f"{dict_info['class_sequence']:02d}. {dict_info['class_title']}")
 
@@ -434,5 +463,5 @@ def _print_error_class(path: str, dict_info: dict):
 __all__ = [
     "get_video_detail_sync",
     "get_course_detail_sync",
-    "get_bootcamp_detail_sync"
+    "get_bootcamp_detail_sync",
 ]

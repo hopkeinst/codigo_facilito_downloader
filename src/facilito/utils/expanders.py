@@ -54,12 +54,15 @@ def expand_course_sections(page: Page) -> None:
 
         page.evaluate(script)
 
+
 def expand_bootcamps_modules(page: Page) -> None:
     """
     Expand the modules of bootcamps
     """
 
-    modules = page.query_selector_all("li[class='f-radius-small f-block f-dark-blue--1 relative']")
+    modules = page.query_selector_all(
+        "li[class='f-radius-small f-block f-dark-blue--1 relative']"
+    )
     for _module in modules:
         script = """
         document.querySelector(".collapsible-header").click();

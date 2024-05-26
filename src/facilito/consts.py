@@ -26,7 +26,9 @@ CLASS_NAME = r"(?m)^(\d+)\.-\s*(.*)"
 CLIENT_ERROR = "FacilitoApi must be used as a context manager"
 
 ## For messages of download
-LOGIN_OK = "[bold reverse blink green]   SUCCESSFUL LOGIN !!!   [/bold reverse blink green]"
+LOGIN_OK = (
+    "[bold reverse blink green]   SUCCESSFUL LOGIN !!!   [/bold reverse blink green]"
+)
 PROCESSING = "[yellow]⠹[/yellow] Processing ..."
 DOWNLOADING = "[yellow]⠹[/yellow] Downloading"
 VIDEO_DL_DONE = "[green]✓[/green] Done!"
@@ -39,5 +41,6 @@ class FileType(Enum):
     """
     File type
     """
+
     PDF = "pdf"
     HTML = "html"

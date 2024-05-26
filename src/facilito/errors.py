@@ -81,7 +81,8 @@ class CourseError(Exception):
     of some internal error (mostly because the course
     is not available anymore).
     """
-    
+
+
 class ClassErrorName(Exception):
     """
     Codigo Facilito refused to serve course data because

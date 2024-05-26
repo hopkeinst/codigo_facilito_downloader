@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class BootcampVideo(BaseModel):
     """Video model, video of URL"""
+
     sequence: int
     title: str
     url: str
@@ -12,6 +13,7 @@ class BootcampVideo(BaseModel):
 
 class BootcampClass(BaseModel):
     """BootcampClass model"""
+
     sequence: int
     title: str
     url: str
@@ -20,6 +22,7 @@ class BootcampClass(BaseModel):
 
 class BootcampModule(BaseModel):
     """BootcampModule model"""
+
     sequence: int
     title: str
     classes: list[BootcampClass]
@@ -27,6 +30,7 @@ class BootcampModule(BaseModel):
 
 class Bootcamp(BaseModel):
     """Bootcamp model"""
+
     url: str
     title: str
     modules: list[BootcampModule]

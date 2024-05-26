@@ -31,7 +31,7 @@ class Client:
         headless: bool = False,
         navigation_timeout: int = 30 * 1000,
         navigation_retries: int = 5,
-        my_browser: str = "firefox"
+        my_browser: str = "firefox",
     ):
         self.account = account
         self.headless = headless
@@ -149,25 +149,17 @@ class Client:
         if os.path.exists(f"{path}/{title}.{file_type.value}"):
             size = os.path.getsize(f"{path}/{title}.{file_type.value}")
             article = Article(
-                    url=url,
-                    title=title,
-                    file_type=file_type.value,
-                    size=size,
-                    exists=True
-                )
+                url=url, title=title, file_type=file_type.value, size=size, exists=True
+            )
         else:
             page.emulate_media(media="screen")
             page.pdf(path=f"{path}/{title}.{file_type.value}", print_background=True)
             if os.path.exists(f"{path}/{title}.{file_type.value}"):
                 size = os.path.getsize(f"{path}/{title}.{file_type.value}")
                 article = Article(
-                    url=url,
-                    title=title,
-                    file_type=file_type.value,
-                    size=size
+                    url=url, title=title, file_type=file_type.value, size=size
                 )
         return article
-
 
     def login(self):
         """
