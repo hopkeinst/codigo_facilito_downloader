@@ -134,11 +134,10 @@ class Client:
 
     def save_article(
         self, url: str, path: str, file_type: FileType, sequence: int = 0
-    ) -> Optional[Article]:
+    ) -> Article:
         """
         Save page as pdf or html
         """
-        article = None
         page = self.page
         page = collectors.get_article_sync(url=url, page=page)
         title = page.title()
@@ -148,7 +147,7 @@ class Client:
             title = f"{sequence:02d}. {title}"
         if os.path.exists(f"{path}/{title}.{file_type.value}"):
             size = os.path.getsize(f"{path}/{title}.{file_type.value}")
-            article = Article(
+            return Article(
                 url=url, title=title, file_type=file_type.value, size=size, exists=True
             )
         else:
@@ -156,10 +155,14 @@ class Client:
             page.pdf(path=f"{path}/{title}.{file_type.value}", print_background=True)
             if os.path.exists(f"{path}/{title}.{file_type.value}"):
                 size = os.path.getsize(f"{path}/{title}.{file_type.value}")
-                article = Article(
-                    url=url, title=title, file_type=file_type.value, size=size
+                return Article(
+                    url=url,
+                    title=title,
+                    file_type=file_type.value,
+                    size=size,
+                    exists=True,
                 )
-        return article
+        return Article(url="", title="", file_type="")
 
     def login(self):
         """

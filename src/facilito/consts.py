@@ -20,7 +20,10 @@ CONFIG_FILE = ".conf.json"
 DOWNLOADS_DIR = "downloads"
 SYMBOLS_NAME = r"[<>.:;'\"/\\|?!¡¿º%&~ª*+=@#$%&[\]\{\}\(\)]"
 NEWLINE_NAME = r"[\n]"
-CLASS_NAME = r"(?m)^(\d+)\.-\s*(.*)"
+CLASS_NAME = r"(?m)^(\d+)-\s*(.*)"
+BOOTCAMP_NAME = r"(?i)\bBootcamp\b(?:\s*de\s*)?(.*)"
+MODULE_NUMBER = r"(?i)\b(Módulo|Modulo)\b(?:\s*)"
+VIDEO_NUMBER = r"(?i)\bClase\b(?:\s*)"
 
 ## For messages of error
 CLIENT_ERROR = "FacilitoApi must be used as a context manager"

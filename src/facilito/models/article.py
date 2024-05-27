@@ -14,5 +14,5 @@ class Article(BaseModel):
     title: str
     sequence: int = 0
     file_type: str = "pdf"
-    size: int
+    size: int = 0
     exists: bool = False

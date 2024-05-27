@@ -49,7 +49,7 @@ def download_article(url: str, path_dir: str = "", sequence: int = 0) -> bool:
         article = client.save_article(
             url=url, path=path, file_type=consts.FileType.PDF, sequence=sequence
         )
-        if article is not None:
+        if article.exists is True:
             size = humanize.naturalsize(article.size, format="%.2f")
             tprint(f"{consts.DOWNLOADING} [green]'[/green]", end="")
             if path_dir != "":
@@ -79,7 +79,7 @@ def download(
     ],
     quality: Quality = typer.Option(
         prompt=True,
-        default=Quality.BEST.value,
+        default=Quality.P720.value,
         prompt_required=True,
     ),
     headless: bool = False,
