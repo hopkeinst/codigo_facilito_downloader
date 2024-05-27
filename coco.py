@@ -221,8 +221,10 @@ def download(
                                     end="",
                                 )
                                 tprint(
-                                    f"[green]{pfx_v:02d}. {video.title}'[/green] ..."
+                                    f"[green]{pfx_v:02d}. {video.title}'[/green] ...",
+                                    end="",
                                 )
+                                tprint(f" [link]{video.url}[/link]")
                                 client.refresh_cookies()
                                 dir_path = f"{consts.DOWNLOADS_DIR}/"
                                 dir_path += f"Curso - {course.title}/"
