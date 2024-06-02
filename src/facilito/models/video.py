@@ -63,6 +63,7 @@ class Video(BaseModel):
             "format": dlp_format,
             "cookiefile": cookiefile,
             "outtmpl": f"{dir_path}/{prefix_name}{video_name}.%(ext)s",
+            # "logger": YoutubeDLLogger(),
             "n_threads": 10,
             "retries": 5,
         }

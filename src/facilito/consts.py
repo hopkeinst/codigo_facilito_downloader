@@ -24,6 +24,8 @@ CLASS_NAME = r"(?m)^(\d+)-\s*(.*)"
 BOOTCAMP_NAME = r"(?i)\bBootcamp\b(?:\s*de\s*)?(.*)"
 MODULE_NUMBER = r"(?i)\b(Módulo|Modulo)\b(?:\s*)"
 VIDEO_NUMBER = r"(?i)\bClase\b(?:\s*)"
+CLASS_BOOTCAMP_NAME = r"(?i)^(Clase(?:\s*)(completa)?)(?:\s*\d+\s*)?$"
+PLAY_COURSE = r"\?play=true$"
 
 ## For messages of error
 CLIENT_ERROR = "FacilitoApi must be used as a context manager"
@@ -36,7 +38,7 @@ PROCESSING = "[yellow]⠹[/yellow] Processing ..."
 DOWNLOADING = "[yellow]⠹[/yellow] Downloading"
 VIDEO_DL_DONE = "[green]✓[/green] Done!"
 VIDEO_DL_ERROR_1 = "An [red]error[/red] occurred while downloading :("
-VIDEO_DL_ERROR_2 = "=>[reverse white]Retrying [/reverse white]..."
+VIDEO_DL_ERROR_2 = "=> [reverse white] Retrying [/reverse white] ..."
 VIDEO_DL_ERROR_MAX = "[red]✗[/red] Unable to download the video"
 
 

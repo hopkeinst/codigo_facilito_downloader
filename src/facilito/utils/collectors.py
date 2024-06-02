@@ -15,6 +15,7 @@ from ..helpers import (
     clean_class_type,
     clean_module_sequence,
     clean_module_title,
+    clean_play_url,
     clean_title,
     clean_video_sequence,
     clean_video_title,
@@ -133,8 +134,9 @@ def get_course_detail_sync(url: str, page: Page) -> Course:
         page (Page): The playwright page object to interact with the webpage.
 
     Returns:
-        Course: An object containing the course details."""
-
+        Course: An object containing the course details.
+    """
+    url = clean_play_url(url)
     if not is_course_url(url):
         error_message = f"[COURSE] Invalid course URL: {url}"
         logger.error(error_message)
@@ -191,12 +193,13 @@ def get_bootcamp_detail_sync(url: str, page: Page) -> Bootcamp:
         f"[bold red]Bootcamp title:[/bold red] [bright_red]{bootcamp_title}[/bright_red]"
     )
 
-    path = f"{consts.DOWNLOADS_DIR}/"
-    path += f"Bootcamp - {bootcamp_title}/"
+    dict_info = {
+        "bootcamp_name": f"Bootcamp - {bootcamp_title}",
+    }
 
     # get bootcamp modules
     try:
-        all_modules = _get_modules(page=page, path=path)
+        all_modules = _get_modules(page=page, dict_info=dict_info)
         bootcamp_obj = Bootcamp(url=url, title=bootcamp_title, modules=all_modules)
         return bootcamp_obj
     except Exception as e:
@@ -282,7 +285,7 @@ def _get_videos(url: str, page: Page, dict_info: dict) -> list[BootcampVideo]:
             video_url = a_tag.get_attribute("href")
             video_sequence = clean_video_sequence(a_tag)
             video_title = clean_video_title(a_tag)
-            if video_title.upper() != "CLASE COMPLETA":
+            if not re.fullmatch(consts.CLASS_BOOTCAMP_NAME, video_title):
                 pattern = re.compile(
                     r"Clase Completa(?:\s*de\s*|\s*-\s*)?(.*)", re.IGNORECASE
                 )
@@ -312,7 +315,7 @@ def _get_videos(url: str, page: Page, dict_info: dict) -> list[BootcampVideo]:
         return []
 
 
-def _get_classes(a_tags, path: str, page: Page, dict_info: dict) -> list[BootcampClass]:
+def _get_classes(a_tags, page: Page, dict_info: dict) -> list[BootcampClass]:
     """
     Get information about the classes that make up
     a bootcamp module
@@ -339,7 +342,7 @@ def _get_classes(a_tags, path: str, page: Page, dict_info: dict) -> list[Bootcam
         class_sequence = clean_class_sequence(a_tag)
         if p_title is not None:
             class_title = clean_title(p_title.inner_html())
-            class_url = consts.BASE_URL + a_tag.get_attribute("href")
+            class_url = consts.BASE_URL + clean_play_url(a_tag.get_attribute("href"))
             if class_type != "Curso":
                 tprint("    [bold magenta]Class Title:[/bold magenta]", end=" ")
                 tprint(
@@ -350,6 +353,7 @@ def _get_classes(a_tags, path: str, page: Page, dict_info: dict) -> list[Bootcam
                     class_url,
                     new_page,
                     dict_info={
+                        "bootcamp_name": dict_info["bootcamp_name"],
                         "module_sequence": dict_info["module_sequence"],
                         "module_title": dict_info["module_title"],
                         "class_sequence": class_sequence,
@@ -368,8 +372,8 @@ def _get_classes(a_tags, path: str, page: Page, dict_info: dict) -> list[Bootcam
                 )
             else:
                 _print_error_class(
-                    path=path,
                     dict_info={
+                        "bootcamp_name": dict_info["bootcamp_name"],
                         "module_sequence": dict_info["module_sequence"],
                         "module_title": dict_info["module_title"],
                         "class_sequence": class_sequence,
@@ -385,7 +389,7 @@ def _get_classes(a_tags, path: str, page: Page, dict_info: dict) -> list[Bootcam
     return all_classes
 
 
-def _get_modules(page: Page, path: str) -> list[BootcampModule]:
+def _get_modules(page: Page, dict_info: dict) -> list[BootcampModule]:
     """
     Get bootcamp modules from a page.
 
@@ -420,13 +424,12 @@ def _get_modules(page: Page, path: str) -> list[BootcampModule]:
         logger.debug("[Module Title] %s", module_title)
         tprint("  [bold cyan]Module Title:[/bold cyan]", end=" ")
         tprint(f"[bright_cyan]{module_sequence:02d}. {module_title}[/bright_cyan]")
-        path += f"{module_sequence:02d}. {module_title}/"
         a_tags = li_tag.query_selector_all("a")
         all_classes = _get_classes(
             a_tags=a_tags,
-            path=path,
             page=page,
             dict_info={
+                "bootcamp_name": dict_info["bootcamp_name"],
                 "module_sequence": module_sequence,
                 "module_title": module_title,
             },
@@ -452,7 +455,7 @@ def _generate_file(path: str, file_name: str, type_file: str, url: str) -> bool:
     return os.path.exists(f"{path}{file_name}.{type_file}")
 
 
-def _print_error_class(path: str, dict_info: dict):
+def _print_error_class(dict_info: dict):
     tprint("[blink bold red]  -- CURSO NO CLASE --  [/blink bold red]")
     tprint("La siguiente no es una clase sino un curso completo, revisarlo:")
     tprint("[bold bright_blue][MODULO][/bold bright_blue]", end=" ")
@@ -463,6 +466,9 @@ def _print_error_class(path: str, dict_info: dict):
     tprint(f"[yellow]{dict_info['class_title']}[/yellow]", end=" ")
     tprint(f"=> [link]{dict_info['class_url']}[/link]")
     tprint("[blink bold red]  -- CURSO NO CLASE --  [/blink bold red]")
+    path = f"{consts.DOWNLOADS_DIR}/"
+    path += f"{dict_info['bootcamp_name']}/"
+    path += f"{dict_info['module_sequence']:02d}. {dict_info['module_title']}/"
     if not _generate_file(
         path=path,
         file_name=f"{dict_info['class_sequence']:02d}. {dict_info['class_title']}",

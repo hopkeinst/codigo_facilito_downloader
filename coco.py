@@ -17,6 +17,8 @@ from facilito.errors import (
     ClassErrorName,
     CourseError,
     DownloadError,
+    ExtractorError,
+    HTTPError,
     URLError,
     VideoError,
 )
@@ -234,11 +236,30 @@ def download(
                                     dir_path=dir_path,
                                     prefix_name=f"{pfx_v:02d}. ",
                                 )
-                            except DownloadError:
+                            except DownloadError as e:
                                 if attempt < max_retries:
                                     tprint(
                                         f"{consts.VIDEO_DL_ERROR_1} {consts.VIDEO_DL_ERROR_2}"
                                     )
+                                    tprint(f"{e}")
+                                else:
+                                    tprint(consts.VIDEO_DL_ERROR_MAX)
+                                    break
+                            except ExtractorError as e:
+                                if attempt < max_retries:
+                                    tprint(
+                                        f"{consts.VIDEO_DL_ERROR_1} {consts.VIDEO_DL_ERROR_2}"
+                                    )
+                                    tprint(f"{e}")
+                                else:
+                                    tprint(consts.VIDEO_DL_ERROR_MAX)
+                                    break
+                            except HTTPError as e:
+                                if attempt < max_retries:
+                                    tprint(
+                                        f"{consts.VIDEO_DL_ERROR_1} {consts.VIDEO_DL_ERROR_2}"
+                                    )
+                                    tprint(f"{e}")
                                 else:
                                     tprint(consts.VIDEO_DL_ERROR_MAX)
                                     break

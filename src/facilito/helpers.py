@@ -290,6 +290,21 @@ def clean_class_type(a_tag) -> str:
     return match.group(2)
 
 
+def clean_play_url(url: str) -> str:
+    """
+    Clean the automatic play of URL into class
+
+    Args:
+        url (str): URL of class or course
+
+    Returns:
+        str: URL without play
+    """
+    if re.search(consts.PLAY_COURSE, url):
+        url = re.sub(consts.PLAY_COURSE, "", url)
+    return url
+
+
 def clean_module_sequence(li_tag) -> int:
     """
     Clean the number sequence of module

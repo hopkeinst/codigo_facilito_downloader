@@ -103,3 +103,15 @@ class DownloadError(Exception):
     """
     Downloading video failed.
     """
+
+
+class HTTPError(Exception):
+    """
+    HTTP request failed.
+    """
+
+
+class ExtractorError(Exception):
+    """
+    Extractor failed.
+    """
