@@ -286,9 +286,7 @@ def _get_videos(url: str, page: Page, dict_info: dict) -> list[BootcampVideo]:
             video_sequence = clean_video_sequence(a_tag)
             video_title = clean_video_title(a_tag)
             if not re.fullmatch(consts.CLASS_BOOTCAMP_NAME, video_title):
-                pattern = re.compile(
-                    r"Clase Completa(?:\s*de\s*|\s*-\s*)?(.*)", re.IGNORECASE
-                )
+                pattern = re.compile(consts.CLASS_BOOTCAMP_NAME, re.IGNORECASE)
                 match = re.search(pattern, video_title)
                 if match:
                     video_title = match.group(1)
@@ -342,7 +340,7 @@ def _get_classes(a_tags, page: Page, dict_info: dict) -> list[BootcampClass]:
         class_sequence = clean_class_sequence(a_tag)
         if p_title is not None:
             class_title = clean_title(p_title.inner_html())
-            class_url = consts.BASE_URL + clean_play_url(a_tag.get_attribute("href"))
+            class_url = consts.BASE_URL + a_tag.get_attribute("href")
             if class_type != "Curso":
                 tprint("    [bold magenta]Class Title:[/bold magenta]", end=" ")
                 tprint(
@@ -443,7 +441,7 @@ def _get_modules(page: Page, dict_info: dict) -> list[BootcampModule]:
     return all_modules
 
 
-def _generate_file(path: str, file_name: str, type_file: str, url: str) -> bool:
+def _generate_file_course(path: str, file_name: str, type_file: str, url: str) -> bool:
     if not os.path.exists(path):
         os.makedirs(path, exist_ok=True)
     with open(f"{path}{file_name}.{type_file}", "w", encoding="utf-8") as f:
@@ -469,7 +467,7 @@ def _print_error_class(dict_info: dict):
     path = f"{consts.DOWNLOADS_DIR}/"
     path += f"{dict_info['bootcamp_name']}/"
     path += f"{dict_info['module_sequence']:02d}. {dict_info['module_title']}/"
-    if not _generate_file(
+    if not _generate_file_course(
         path=path,
         file_name=f"{dict_info['class_sequence']:02d}. {dict_info['class_title']}",
         type_file="txt",
